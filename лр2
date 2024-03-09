@@ -20,24 +20,32 @@ numbers_to_words = {
     'f': 'пятнадцать'
 }
 def hex_to_words(hex_number):
-    hex_number = hex_number[2:]
+    hex_number = hex_number[2:]  #убираем префикс '0x'
     result = ""
     for digit in hex_number:
-        result += numbers_to_words[digit] + " "
-    return result.strip()
+        result += numbers_to_words[digit] + " "  #преобразуем каждую цифру в слово
+    return result.strip()  #убираем лишние пробелы в начале и конце строки
 K = int(input("Введите значение K: "))
+
+#регулярное выражение для нахождения шестнадцатеричных чисел, соответствующих условиям задачи
 hex_regex = rf"0x[02468acef][0-9a-f]{{{K - 1},}}[02468acef]"
+
 with open("lab 1.txt", "r") as file:
     data = file.read()
     hex_numbers = re.findall(hex_regex, data)
+    
+    #фильтруем числа, чтобы они не превышали 2048
     hex_numbers = [hex_num for hex_num in hex_numbers if int(hex_num, 16) <= 2048]
+    
     print("Найденные шестнадцатиричные числа и их количество:")
     for hex_num in hex_numbers:
         print(f"Число: {hex_num}, Прописью: {hex_to_words(hex_num)}, Количество цифр: {len(hex_num) - 2}")
     total_count = len(hex_numbers)
     print(f"Всего найдено шестнадцатиричных чисел: {total_count}")
+    #находим максимальное число и выводим его прописью
     if hex_numbers:
         max_hex_num = max(hex_numbers, key=lambda x: int(x, 16))
         print(f"Максимальное число: {max_hex_num}, Прописью: {hex_to_words(max_hex_num)}")
     else:
         print("Шестнадцатеричные числа не найдены")
+
