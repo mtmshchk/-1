@@ -1,0 +1,112 @@
+#26.	Формируется матрица F следующим образом: если в С количество нулей в нечетных столбцах в области 1 больше, 
+#чем произведение чисел по периметру области 4, то поменять в С симметрично области 1 и 3 местами, 
+#иначе В и Е поменять местами несимметрично. При этом матрица А не меняется. 
+#После чего вычисляется выражение: ((К*A T)*(F+А-F).
+#Выводятся по мере формирования А, F и все матричные операции последовательно.
+
+def print_matrix(matrix):  
+    for row in matrix: 
+        print(' '.join(map(str, row))) 
+
+def create_matrix_A(N):  #функция для создания матрицы A
+    A = [[0] * N for _ in range(N)]  #создаем матрицу размером N x N, заполненную нулями
+    for i in range(N):
+        for j in range(N):
+            if i < N // 2 and j < N // 2:  #элемент принадлежит области 1
+                A[i][j] = 1  #присваиваем элементу значение 1
+            elif i < N // 2 and j >= N // 2:  #элемент принадлежит области 2
+                A[i][j] = 2  #присваиваем элементу значение 2
+            elif i >= N // 2 and j < N // 2:  #элемент принадлежит области 3
+                A[i][j] = 3  #присваиваем элементу значение 3
+            else: 
+                A[i][j] = 4  #присваиваем элементу значение 4
+    return A 
+
+def count_zeros_in_odd_columns(C):  #фукнция для подсчета нулей в нечетных столбцах матрицы C
+    count = 0  #счетчик нулей
+    for j in range(1, len(C[0]), 2):  #для каждого нечетного столбца матрицы
+        for i in range(len(C)):  #
+            if C[i][j] == 0:  # Если элемент равен нулю
+                count += 1  #увеличиваем счетчик
+    return count
+
+def calculate_perimeter_product(C):  #функцию для вычисления произведения элементов по периметру матрицы C
+    perimeter_product = C[0][0] * C[0][-1] * C[-1][-1] * C[-1][0]  #вычисляем произведение элементов по периметру
+    return perimeter_product
+
+def form_matrix_F(C):  #функция для формирования матрицы F на основе матрицы C
+    F = [[elem for elem in row] for row in C]  #создаем копию матрицы C
+    zeros_count = count_zeros_in_odd_columns(C)  #считаем количество нулей в нечетных столбцах
+    perimeter_product = calculate_perimeter_product(C)  #вычисляем произведение элементов по периметру
+    if zeros_count > perimeter_product:  #количество нулей больше произведения элементов периметра
+        for i in range(len(F) // 2):  #для каждой строки в верхней половине матрицы
+            for j in range(len(F[0]) // 2):  #для каждого столбца в левой половине матрицы
+                #меняем значения элементов симметрично относительно центра матрицы
+                F[i][j], F[i + len(F) // 2][j + len(F[0]) // 2] = F[i + len(F) // 2][j + len(F[0]) // 2], F[i][j]
+    else: 
+        for i in range(len(F) // 2):  # 
+            for j in range(len(F[0]) // 2):
+                #меняем значения элементов несимметрично между областями В и Е
+                F[i][j + len(F[0]) // 2], F[i + len(F) // 2][j] = F[i + len(F) // 2][j], F[i][j + len(F[0]) // 2]
+    return F 
+
+def transpose_matrix(matrix):  #фукцния для транспонирования матрицы
+    return [list(row) for row in zip(*matrix)]
+
+def multiply_matrix_by_scalar(matrix, scalar):  #функция для умножения матрицы на скаляр
+    return [[scalar * cell for cell in row] for row in matrix]
+
+def matrix_addition(A, B):  #функция для сложения двух матриц
+    return [[A[i][j] + B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+
+def matrix_multiplication(A, B):  #функция для умножения двух матриц
+    result = [[0 for _ in range(len(B[0]))] for _ in range(len(A))]  #создаем матрицу-результат нулей
+    for i in range(len(A)):
+        for j in range(len(B[0])):  
+            for k in range(len(B)): 
+                result[i][j] += A[i][k] * B[k][j]  #вычисляем произведение и суммируем
+    return result 
+
+def main():
+    K = int(input("Введите число K: "))
+    N = int(input("Введите размерность матрицы N (кратный 4): "))
+    if N % 4 != 0:  # Если размерность матрицы не кратна 4
+        print("N должно быть кратным 4.")  
+        return 
+    print("Матрица A:") 
+    A = create_matrix_A(N)  #создаем матрицу A
+    print_matrix(A) 
+    F_sequence = []  #создаем пустой список для последовательности матриц F
+    C = create_matrix_A(N)  #создаем матрицу C
+    F = form_matrix_F(C)  #формируем матрицу F
+    F_sequence.append(F)  #добавляем матрицу F в последовательность
+    KA_transpose_sequence = []  #создаем пустой список для последовательности транспонированных матриц KA
+    for i in range(N // 4): 
+        mid = N // 2  #определяем середину матрицы
+        B = [row[:mid] for row in A[:mid]]  #создаем матрицу B
+        C = [row[mid:] for row in A[:mid]]  #создаем матрицу C
+        D = [row[:mid] for row in A[mid:]]  #создаем матрицу D
+        E = [row[mid:] for row in A[mid:]]  #создаем матрицу E
+        if count_zeros_in_odd_columns(C) > calculate_perimeter_product(E):  #если количество нулей в нечетных столбцах больше произведения элементов периметра
+            for i in range(mid):  #для каждого элемента в диапазоне от 0 до середины матрицы
+                for j in range(mid):  #для каждого элемента в диапазоне от 0 до середины матрицы
+                    E[i][j], E[j][i] = E[j][i], E[i][j]  #меняем значения элементов симметрично относительно центра матрицы
+        else: 
+            C, E = E, C  #меняем значения матриц C и E местами
+        F = [B[i] + C[i] for i in range(mid)] + [D[i] + E[i] for i in range(mid)]  #объединяем матрицы B, C, D, E в матрицу F
+        F_sequence.append(F)
+        KA = multiply_matrix_by_scalar(A, K)  #умножаем матрицу A на скаляр K
+        KA_transpose = transpose_matrix(KA)  #транспонируем матрицу KA
+        KA_transpose_sequence.append(KA_transpose)  #добавляем транспонированную матрицу KA в последовательность
+        A_squared = matrix_addition(matrix_addition(matrix_multiplication(A, A), A), A)  #возводим матрицу A в квадрат
+        expression_result = matrix_multiplication(KA_transpose, matrix_addition(F, matrix_addition(A, multiply_matrix_by_scalar(F, -1))))  #вычисляем результат выражения
+        print("Матрица F после преобразований:") 
+        print_matrix(F) 
+        print("Матрица KA (K умноженное на A):")  
+        print_matrix(KA) 
+        print("Матрица A в квадрате:") 
+        print_matrix(A_squared) 
+        print("Результат выражения ((К*A^T)*(F+А-F)):")
+        print_matrix(expression_result)  
+if __name__ == "__main__": 
+    main() 
