@@ -25,12 +25,12 @@ def create_matrix_A(N):  #функция для создания матрицы 
 def count_zeros_in_odd_columns(C):  #фукнция для подсчета нулей в нечетных столбцах матрицы C
     count = 0  #счетчик нулей
     for j in range(1, len(C[0]), 2):  #для каждого нечетного столбца матрицы
-        for i in range(len(C)):  #
-            if C[i][j] == 0:  # Если элемент равен нулю
+        for i in range(len(C)):  
+            if C[i][j] == 0: 
                 count += 1  #увеличиваем счетчик
     return count
 
-def calculate_perimeter_product(C):  #функцию для вычисления произведения элементов по периметру матрицы C
+def calculate_perimeter_product(C):  #функция для вычисления произведения элементов по периметру матрицы C
     perimeter_product = C[0][0] * C[0][-1] * C[-1][-1] * C[-1][0]  #вычисляем произведение элементов по периметру
     return perimeter_product
 
@@ -83,10 +83,10 @@ def main():
     KA_transpose_sequence = []  #создаем пустой список для последовательности транспонированных матриц KA
     for i in range(N // 4): 
         mid = N // 2  #определяем середину матрицы
-        B = [row[:mid] for row in A[:mid]]  #создаем матрицу B
-        C = [row[mid:] for row in A[:mid]]  #создаем матрицу C
-        D = [row[:mid] for row in A[mid:]]  #создаем матрицу D
-        E = [row[mid:] for row in A[mid:]]  #создаем матрицу E
+        B = [row[:mid] for row in A[:mid]]  #создаем матрицы BCDE
+        C = [row[mid:] for row in A[:mid]]  
+        D = [row[:mid] for row in A[mid:]]  
+        E = [row[mid:] for row in A[mid:]]  
         if count_zeros_in_odd_columns(C) > calculate_perimeter_product(E):  #если количество нулей в нечетных столбцах больше произведения элементов периметра
             for i in range(mid):  #для каждого элемента в диапазоне от 0 до середины матрицы
                 for j in range(mid):  #для каждого элемента в диапазоне от 0 до середины матрицы
