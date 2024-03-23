@@ -4,6 +4,7 @@
 #После чего если определитель матрицы А больше суммы диагональных элементов матрицы F,
 #то вычисляется выражение: A-1*AT – K * F, иначе вычисляется выражение (A +G-1-F-1)*K, 
 #где G-нижняя треугольная матрица, полученная из А. Выводятся по мере формирования А, F и все матричные операции последовательно.
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -15,6 +16,7 @@ def create_matrix_F(A, B, C, D, E):
     count_zeros_C = np.sum(C[:, 1::2] == 0)
     perimeter_product = np.prod(np.hstack([C[0, :], C[:, -1], C[-1, ::-1], C[::-1, 0]]))
 
+    # Проверяем условие и формируем матрицу F в соответствии с задачей
     if count_zeros_C > perimeter_product:
         F[:N, :N], F[:N, N:], F[N:, :N], F[N:, N:] = C, B, D, E
     else:
@@ -32,30 +34,38 @@ def main():
     K = int(input("Введите число K: "))
     N = int(input("Введите размер N (количество строк/столбцов матрицы): "))
 
+    # Генерируем случайные подматрицы
     B = create_submatrix(N // 2)
     C = create_submatrix(N // 2)
     D = create_submatrix(N // 2)
     E = create_submatrix(N // 2)
 
+    # Формируем основную матрицу A из подматриц
     A = np.block([[B, C], [D, E]])
     print("Матрица A:")
     print(A)
     plot_matrix(A, "Матрица A")
 
+    # Формируем матрицу F в соответствии с условиями
     F = create_matrix_F(A, B, C, D, E)
     print("Матрица F:")
     print(F)
     plot_matrix(F, "Матрица F")
 
+    # Вычисляем определитель матрицы A и сумму диагональных элементов матрицы F
     det_A = np.linalg.det(A)
     sum_diagonal_F = np.trace(F)
 
+    # Выполняем матричные операции в соответствии с условиями задачи
     if det_A > sum_diagonal_F:
+        # Если определитель A больше суммы диагональных элементов F, вычисляем выражение A^-1 * A^T - K * F
         result = np.linalg.inv(A) @ A.T - K * F
     else:
+        # В противном случае вычисляем выражение (A + G^-1 - F^-1) * K, где G - нижняя треугольная матрица из A
         G = np.tril(A)
         result = (A + np.linalg.inv(G) - np.linalg.inv(F)) * K
 
+    # Выводим результат
     print("Результат:")
     print(result)
     plot_matrix(result, "Результат")
