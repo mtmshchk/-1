@@ -1,0 +1,110 @@
+#Задание состоит из двух частей.
+1 часть – написать программу в соответствии со своим вариантом задания. 
+Написать 2 варианта формирования (алгоритмический и с помощью функций Питона), сравнив по времени их выполнение.
+2 часть – усложнить написанную программу, введя по своему усмотрению в условие 
+минимум одно ограничение на характеристики объектов (которое будет сокращать количество переборов) 
+и целевую функцию для нахождения оптимального решения.
+
+#вариант 26: Вводятся К целых чисел. Составьте все возможные различные правильные дроби из этих чисел
+
+import timeit
+from itertools import combinations
+
+# Ввод чисел с ограничением
+def input_numbers():
+    nums = list(map(int, input("Введите целые числа через пробел: ").split()))
+    return nums
+
+# Измерение времени выполнения
+def measure_time(func, *args):
+    start_time = timeit.default_timer()
+    result = func(*args)
+    end_time = timeit.default_timer()
+    execution_time = end_time - start_time
+    return result, execution_time
+
+# Алгоритмический подход
+def algorithmic_approach(nums):
+    fractions = set()
+    for pair in combinations(nums, 2):
+        fraction = pair[0] / pair[1]
+        fractions.add(fraction)
+    return fractions
+
+# Функциональный подход (itertools)
+def functional_approach(nums):
+    fractions = set()
+    for i in range(len(nums)):
+        for j in range(i+1, len(nums)):
+            fraction = nums[i] / nums[j]
+            fractions.add(fraction)
+    return fractions
+
+# Усложненный алгоритмический подход (кратные 5)
+def complex_algorithmic_approach(nums):
+    fractions = set()
+    for i in range(len(nums)):
+        for j in range(i+1, len(nums)):
+            if nums[i] % 5 == 0:
+                fraction = nums[i] // nums[j]
+                fractions.add(fraction)
+            elif nums[j] % 5 == 0:
+                fraction = nums[j] // nums[i]
+                fractions.add(fraction)
+    return fractions
+
+# Усложненный функциональный подход (itertools, кратные 5)
+def complex_functional_approach(nums):
+    fractions = set()
+    for pair in combinations(nums, 2):
+        if pair[0] % 5 == 0:
+            fraction = pair[0] // pair[1]
+            fractions.add(fraction)
+        elif pair[1] % 5 == 0:
+            fraction = pair[1] // pair[0]
+            fractions.add(fraction)
+    return fractions
+
+# Ввод чисел
+nums = input_numbers()
+
+# Выполнение и измерение времени для алгоритмического подхода
+algorithmic_result, time_alg = measure_time(algorithmic_approach, nums)
+
+# Выполнение и измерение времени для функционального подхода
+functional_result, time_func = measure_time(functional_approach, nums)
+
+# Выполнение и измерение времени для усложненного алгоритмического подхода
+complex_algorithmic_result, time_complex_alg = measure_time(complex_algorithmic_approach, nums)
+
+# Выполнение и измерение времени для усложненного функционального подхода
+complex_functional_result, time_complex_func = measure_time(complex_functional_approach, nums)
+
+# Вывод результатов
+print("Алгоритмический подход:")
+print(algorithmic_result)
+print("Время выполнения: {:.6f} секунд".format(time_alg))
+
+print("\nФункциональный подход (itertools):")
+print(functional_result)
+print("Время выполнения: {:.6f} секунд".format(time_func))
+
+print("\nУсложненный алгоритмический подход (кратные 5):")
+print(complex_algorithmic_result)
+print("Время выполнения: {:.6f} секунд".format(time_complex_alg))
+
+print("\nУсложненный функциональный подход (itertools, кратные 5):")
+print(complex_functional_result)
+print("Время выполнения: {:.6f} секунд".format(time_complex_func))
+
+# Сравнение времени выполнения алгоритмического и функционального подходов
+if time_alg < time_func:
+    print("\nАлгоритмический подход быстрее функционального на {:.6f} секунд.".format(time_func - time_alg))
+else:
+    print("\nФункциональный подход (itertools) быстрее алгоритмического на {:.6f} секунд.".format(time_alg - time_func))
+
+# Сравнение времени выполнения усложненных подходов
+if time_complex_alg < time_complex_func:
+    print("Усложненный алгоритмический подход быстрее усложненного функционального на {:.6f} секунд.".format(time_complex_func - time_complex_alg))
+else:
+    print("Усложненный функциональный подход (itertools, кратные 5) быстрее усложненного алгоритмического на {:.6f} секунд.".format(time_complex_alg - time_complex_func))
