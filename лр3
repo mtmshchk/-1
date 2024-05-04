@@ -1,95 +1,116 @@
-#26.Формируется матрица F следующим образом: если в С количество нулей в нечетных столбцах в области 1 больше, 
-#чем произведение чисел по периметру области 4, то поменять в С симметрично области 1 и 3 местами, 
-#иначе В и Е поменять местами несимметрично. При этом матрица А не меняется. 
-#После чего вычисляется выражение: ((К*A^T)*(F+А-F).
-#Выводятся по мере формирования А, F и все матричные операции последовательно.
+# Вариант 26. Формируется матрица F следующим образом: если в Е количество нулей в нечетных столбцах в области 1 больше,
+# чем произведение чисел по периметру области 2, то поменять в В симметрично области 1 и 3 местами,
+# иначе С и Е поменять местами несимметрично. При этом матрица А не меняется.
+# После чего вычисляется выражение: ((К*A T)*(F+А)-K* F T .
+# Выводятся по мере формирования А, F и все матричные операции последовательно.
+import random
 
-import random 
-
-def create_test_matrix(N):
-    return [[random.randint(-10, 10) for _ in range(N)] for _ in range(N)]
-
-# Функция для подсчета количества нулей в нечетных столбцах левого треугольника подматрицы C
-def count_zeros_in_odd_columns_of_left_triangle(matrix):
-    count = 0
-    for i in range(len(matrix)):
-        for j in range(i + 1):
-            if j % 2 == 0 and matrix[i][j] == 0: 
-                count += 1  # Увеличиваем счетчик
-    return count
-
-# Функция для вычисления произведения чисел по периметру верхнего треугольника подматрицы D
-def product_of_perimeter_of_upper_triangle(matrix):
-    size = len(matrix)
-    product = 1
-    for i in range(size):
-        for j in range(size - i):
-            if i == 0 or j == 0 or j == size - i - 1:  # Если элемент на границе
-                product *= matrix[i][j]  # Добавляем его в произведение
-    return product
-
-# Функция для формирования матрицы F согласно условиям задания
-def create_matrix_F(A, B, C, D, E, K):
-    F = [row[:] for row in A]  # Копирование матрицы A
-
-    # Подсчет количества нулей в нечетных столбцах левого треугольника подматрицы C
-    zeros_in_C = count_zeros_in_odd_columns_of_left_triangle(C)
-    # Вычисление произведения чисел по периметру верхнего треугольника подматрицы D
-    product_of_D_perimeter = product_of_perimeter_of_upper_triangle(D)
-
-    # Если количество нулей в C больше, чем произведение чисел по периметру D
-    if zeros_in_C > product_of_D_perimeter:
-        # Меняем области 1 и 3 в матрице F симметрично
-        for i in range(len(A) // 2):
-            for j in range(i + 1):
-                # Обмен элементов между симметричными позициями
-                F[i][j], F[len(A) // 2 + i][len(A) - j - 1] = F[len(A) // 2 + i][len(A) - j - 1], F[i][j]
-    else:
-        # Меняем местами матрицы B и E несимметрично
-        for i in range(len(A) // 2):
-            for j in range(len(A) // 2):
-                # Обмен элементов между соответствующими позициями в B и E
-                F[i][j + len(A) // 2], F[i + len(A) // 2][j] = E[i][j], B[i][j]
-
-    return F
+def create_matrix(n):
+    return [[random.randint(-10, 10) for _ in range(n)] for _ in range(n)]
 
 def print_matrix(matrix):
     for row in matrix:
         print(' '.join(map(str, row)))
     print()
 
-K = int(input("Введите число K: ")) 
-N = int(input("Введите размерность N: ")) 
+def transpose(matrix):
+    return [list(row) for row in zip(*matrix)]
 
-# Создание тестовой матрицы A
-A = create_test_matrix(N)
+def add_matrices(a, b):
+    return [[a[i][j] + b[i][j] for j in range(len(a[0]))] for i in range(len(a))]
+
+def multiply_matrix_by_number(matrix, number):
+    return [[number * matrix[i][j] for j in range(len(matrix[0]))] for i in range(len(matrix))]
+
+def count_zeros_in_odd_columns_in_area1(matrix):
+    count = 0
+    n = len(matrix)
+    for i in range(n//2):
+        for j in range(i):
+            if matrix[i][j] == 0:
+                count += 1
+    for i in range(n//2, n):
+        for j in range(n - (i + 1)):
+            if matrix[i][j] == 0:
+                count += 1
+    return count
+
+def product_of_elements_in_area2(matrix):
+    product = 1
+    n = len(matrix)
+    for i in range(n//2):
+        for j in range(n//2, n):
+            product *= matrix[i][j]
+    return product
+
+def swap_symmetrically_areas_1_and_3(matrix):
+    n = len(matrix)
+    for i in range(n//2):
+        for j in range(i):
+            matrix[i][j], matrix[n-j-1][n-i-1] = matrix[n-j-1][n-i-1], matrix[i][j]
+
+def swap_matrices_c_and_e(c, e):
+    return e, c
+
+
+
+K = int(input("Введите K: "))
+N = int(input("Введите N: "))
+
+
+A = create_matrix(N)
+B = [row[:N//2] for row in A[:N//2]]
+C = [row[N//2:] for row in A[:N//2]]
+D = [row[:N//2] for row in A[N//2:]]
+E = [row[N//2:] for row in A[N//2:]]
+
 print("Матрица A:")
 print_matrix(A)
 
-# Разбиение матрицы A на подматрицы B, C, D, E
-half = N // 2
-B = [row[:half] for row in A[:half]]
-C = [row[half:] for row in A[:half]]
-D = [row[:half] for row in A[half:]]
-E = [row[half:] for row in A[half:]]
 
-# Формирование матрицы F в соответствии с условиями задания
-F = create_matrix_F(A, B, C, D, E, K)
+def form_matrix_f(b, c, d, e, condition):
+    n = len(b) * 2
+    f = [[0] * n for _ in range(n)]
+    if condition:
+
+        for i in range(n//2):
+            f[i][:n//2] = b[i]
+            f[i + n//2][:n//2] = d[i]
+
+        for i in range(n//2):
+            f[i][n//2:] = c[i]
+            f[i + n//2][n//2:] = e[i]
+    else:
+
+        for i in range(n//2):
+            f[i][:n//2] = b[i]
+            f[i + n//2][:n//2] = d[i]
+
+        for i in range(n//2):
+            f[i][n//2:] = e[i]
+            f[i + n//2][n//2:] = c[i]
+    return f
+
+
+
+zeros_in_E = count_zeros_in_odd_columns_in_area1(E)
+product_in_E = product_of_elements_in_area2(E)
+
+condition = zeros_in_E > product_in_E
+if condition:
+    swap_symmetrically_areas_1_and_3(B)
+F = form_matrix_f(B, C, D, E, condition)
+
 print("Матрица F:")
 print_matrix(F)
 
-# Транспонирование матриц A и F
-A_T = [[A[j][i] for j in range(len(A))] for i in range(len(A[0]))]
 
-# Вычисление суммы матриц F и A
-F_plus_A = [[F[i][j] + A[i][j] for j in range(len(F[0]))] for i in range(len(F))]
-# Умножение транспонированной матрицы A на K
-K_mult_A_T = [[K * A_T[i][j] for j in range(len(A_T[0]))] for i in range(len(A_T))]
-# Умножение матрицы F на K и ее транспонирование
-K_mult_F_T = [[K * F[j][i] for j in range(len(F))] for i in range(len(F[0]))]
+AT = transpose(A)
+F_plus_A = add_matrices(F, A)
+F_transposed = transpose(F)
 
-# Вычисление выражения ((K * A^T) * (F + A - F))
-expr = [[K_mult_A_T[i][j] * (F_plus_A[i][j] - K_mult_F_T[i][j]) for j in range(len(F[0]))] for i in range(len(F))]
+expr = add_matrices(multiply_matrix_by_number(AT, K), F_plus_A)
+expr = add_matrices(expr, multiply_matrix_by_number(F_transposed, -K))
 
-print("Результат выражения ((K * A^T) * (F + A - F)):")
+print("Результат:")
 print_matrix(expr)
