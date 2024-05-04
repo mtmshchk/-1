@@ -24,14 +24,12 @@ def is_proper_fraction(num, den):
     gcd = calculate_gcd(num, den)
     return num < den and gcd == 1
 
-def is_prime(num):
+def is_prime(n):
     """Проверка, является ли число простым."""
-    if num < 2:
-        return False
-    for i in range(2, int(math.sqrt(num)) + 1):
-        if num % i == 0:
-            return False
-    return True
+    d = 2
+    while d * d <= n and n % d != 0:
+        d += 1
+    return d * d > n
 
 def generate_proper_fractions_algorithm(numbers, with_prime=False):
     """Генерация всех возможных правильных дробей из чисел."""
@@ -86,6 +84,21 @@ def optimize_common_denominator(numbers):
     else:
         return builtin_result, builtin_common_denominator
 
+def generate_proper_fractions_with_primes(numbers):
+    """Генерация всех возможных правильных дробей из чисел с учетом простых знаменателей."""
+    proper_fractions = set()
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            num = numbers[i]
+            den = numbers[j]
+            if is_proper_fraction(num, den) and is_prime(den):
+                proper_fractions.add((num, den))
+    return list(proper_fractions)
+
+def target_function(sum_of_denominators):
+    """Целевая функция: выбрать наибольший знаменатель из набора правильных дробей."""
+    return sum_of_denominators
+
 numbers = list(map(int, input("Введите целые числа через пробел: ").split()))
 
 # Часть 1: Генерация обычных правильных дробей без учета простых знаменателей
@@ -102,8 +115,17 @@ print("Время выполнения (метод с использование
 
 # Часть 2: Генерация правильных дробей с учетом простых знаменателей с усложнением
 print("\nЧасть 2: Генерация правильных дробей с учетом простых знаменателей с усложнением")
-result, common_denominator = optimize_common_denominator(numbers)
-print("Наиболее оптимальный набор правильных дробей:")
-for fraction in result:
+result = generate_proper_fractions_with_primes(numbers)
+result_with_primes = [fraction for fraction in result if is_prime(fraction[1])]
+result_without_primes = [fraction for fraction in result if not is_prime(fraction[1])]
+result.sort(key=target_function, reverse=True)  # Сортировка по убыванию, чтобы первый элемент был с наибольшим знаменателем
+
+print("Правильные дроби с простыми знаменателями:")
+for fraction in result_with_primes:
     print(f"{fraction[0]}/{fraction[1]}")
-print("Общий знаменатель:", common_denominator)
+
+print("Дробь с наибольшим простым знаменателем в наборе правильных дробей:")
+if result:
+    print(f"{result[0][0]}/{result[0][1]}")
+else:
+    print("Набор правильных дробей пуст")
