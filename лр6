@@ -1,131 +1,103 @@
-#Задание состоит из двух частей.
+"""
+Задание состоит из двух частей.
 1 часть – написать программу в соответствии со своим вариантом задания. 
 Написать 2 варианта формирования (алгоритмический и с помощью функций Питона), сравнив по времени их выполнение.
 2 часть – усложнить написанную программу, введя по своему усмотрению в условие 
 минимум одно ограничение на характеристики объектов (которое будет сокращать количество переборов) 
 и целевую функцию для нахождения оптимального решения.
-
-#вариант 26: Вводятся К целых чисел. Составьте все возможные различные правильные дроби из этих чисел
+вариант 26: Вводятся К целых чисел. Составьте все возможные различные правильные дроби из этих чисел
+"""
 
 import time
-import math
 
-def calculate_gcd(a, b):
-    """Вычисление наибольшего общего делителя."""
-    while a != b:
-        if a > b:
-            a = a - b
-        else:
-            b = b - a
-    return a
+# Алгоритмический подход
+def generate_fractions_algorithmic(numbers):
+    fractions_set = set()
 
-def is_proper_fraction(num, den):
-    """Проверка, является ли дробь правильной."""
-    gcd = calculate_gcd(num, den)
-    return num < den and gcd == 1
-
-def is_prime(n):
-    """Проверка, является ли число простым."""
-    d = 2
-    while d * d <= n and n % d != 0:
-        d += 1
-    return d * d > n
-
-def generate_proper_fractions_algorithm(numbers, with_prime=False):
-    """Генерация всех возможных правильных дробей из чисел."""
-    proper_fractions = set()
+    # Генерация всех возможных правильных дробей из пар чисел
     for i in range(len(numbers)):
         for j in range(i + 1, len(numbers)):
-            num = numbers[i]
-            den = numbers[j]
-            if is_proper_fraction(num, den) and (not with_prime or is_prime(den)):
-                proper_fractions.add((num, den))
-    return list(proper_fractions)
+            # Проверяем, что числитель меньше знаменателя
+            if numbers[i] < numbers[j]:
+                # Находим НОД чисел для сокращения дроби
+                a, b = numbers[i], numbers[j]
+                while b:
+                    a, b = b, a % b
+                gcd = a
 
-def generate_proper_fractions_builtin(numbers, with_prime=False):
-    """Генерация всех возможных правильных дробей из чисел с использованием встроенных функций."""
-    proper_fractions = set()
+                # Добавляем сокращённую дробь в множество
+                fractions_set.add("{}/{}".format(numbers[i] // gcd, numbers[j] // gcd))
+
+    return fractions_set
+
+# С использованием функций Python
+def generate_fractions_pythonic(numbers):
+    fractions_set = set()
+
+    # Генерация всех возможных правильных дробей из пар чисел с помощью двойного цикла
     for i in range(len(numbers)):
         for j in range(i + 1, len(numbers)):
-            num = numbers[i]
-            den = numbers[j]
-            if math.gcd(num, den) == 1 and num < den and (not with_prime or is_prime(den)):
-                proper_fractions.add((num, den))
-    return list(proper_fractions)
+            # Проверяем, что числитель меньше знаменателя
+            if numbers[i] < numbers[j]:
+                # Находим НОД чисел для сокращения дроби
+                a, b = numbers[i], numbers[j]
+                while b:
+                    a, b = b, a % b
+                gcd = a
+                
+                # Добавляем дробь в множество
+                fractions_set.add("{}/{}".format(numbers[i] // gcd, numbers[j] // gcd))
 
-def calculate_common_denominator(fractions):
-    """Вычисление общего знаменателя для списка дробей."""
-    common_denominator = 1
-    for fraction in fractions:
-        common_denominator *= fraction[1]
-    return common_denominator
+    return fractions_set
 
-def measure_time(algorithmic_approach, builtin_approach, nums, with_prime=False):
-    """Измерение времени выполнения двух подходов."""
-    start_time_alg = time.time()
-    algorithmic_result = algorithmic_approach(nums, with_prime)
-    end_time_alg = time.time()
-    time_alg = end_time_alg - start_time_alg
+# Функция для проверки является ли дробь четной
+def is_even_fraction(fraction):
+    numerator, denominator = map(int, fraction.split('/'))
+    # Проверяем, является ли знаменатель четным
+    return denominator % 2 == 0
 
-    start_time_builtin = time.time()
-    builtin_result = builtin_approach(nums, with_prime)
-    end_time_builtin = time.time()
-    time_builtin = end_time_builtin - start_time_builtin
+# Функция для нахождения максимальной дроби среди списка
+def find_max_fraction(fractions_list):
+    max_fraction = None
+    for fraction in fractions_list:
+        if max_fraction is None or fraction > max_fraction:
+            max_fraction = fraction
+    return max_fraction
 
-    return algorithmic_result, time_alg, builtin_result, time_builtin
+# Получение ввода от пользователя
+K = int(input("Введите количество целых чисел: "))
+numbers = [int(input("Введите число {}: ".format(i + 1))) for i in range(K)]
 
-def optimize_common_denominator(numbers):
-    """Оптимизация по общему знаменателю."""
-    algorithmic_result, _, builtin_result, _ = measure_time(generate_proper_fractions_algorithm, generate_proper_fractions_builtin, numbers)
-    algorithmic_common_denominator = calculate_common_denominator(algorithmic_result)
-    builtin_common_denominator = calculate_common_denominator(builtin_result)
-    if algorithmic_common_denominator < builtin_common_denominator:
-        return algorithmic_result, algorithmic_common_denominator
-    else:
-        return builtin_result, builtin_common_denominator
+# Замеряем время выполнения алгоритмического подхода
+start_time_algorithmic = time.time()
+fractions_algorithmic = generate_fractions_algorithmic(numbers)
+end_time_algorithmic = time.time()
 
-def generate_proper_fractions_with_primes(numbers):
-    """Генерация всех возможных правильных дробей из чисел с учетом простых знаменателей."""
-    proper_fractions = set()
-    for i in range(len(numbers)):
-        for j in range(i + 1, len(numbers)):
-            num = numbers[i]
-            den = numbers[j]
-            if is_proper_fraction(num, den) and is_prime(den):
-                proper_fractions.add((num, den))
-    return list(proper_fractions)
+# Замеряем время выполнения способа с использованием функций Python
+start_time_pythonic = time.time()
+fractions_pythonic = generate_fractions_pythonic(numbers)
+end_time_pythonic = time.time()
 
-def target_function(sum_of_denominators):
-    """Целевая функция: выбрать наибольший знаменатель из набора правильных дробей."""
-    return sum_of_denominators
+# Вывод результатов
+print("Все возможные различные правильные дроби (алгоритмический подход):", fractions_algorithmic)
+print("Время выполнения алгоритмического подхода: {:.6f} секунд".format(end_time_algorithmic - start_time_algorithmic))
 
-numbers = list(map(int, input("Введите целые числа через пробел: ").split()))
+print("Все возможные различные правильные дроби (способ с использованием функций Python):", fractions_pythonic)
+print("Время выполнения способа с использованием функций Python: {:.6f} секунд".format(end_time_pythonic - start_time_pythonic))
 
-# Часть 1: Генерация обычных правильных дробей без учета простых знаменателей
-print("Часть 1: Генерация обычных правильных дробей без учета простых знаменателей")
-algorithmic_result, time_alg, builtin_result, time_builtin = measure_time(generate_proper_fractions_algorithm, generate_proper_fractions_builtin, numbers)
-print("Правильные дроби без учета простых знаменателей (алгоритмический метод):")
-for fraction in algorithmic_result:
-    print(f"{fraction[0]}/{fraction[1]}")
-print("Время выполнения (алгоритмический метод): {:.8f}".format(time_alg))
-print("Правильные дроби без учета простых знаменателей (метод с использованием встроенных функций):")
-for fraction in builtin_result:
-    print(f"{fraction[0]}/{fraction[1]}")
-print("Время выполнения (метод с использованием встроенных функций): {:.8f}".format(time_builtin))
+# Фильтруем четные дроби из множества
+even_fractions = [fraction for fraction in fractions_pythonic if is_even_fraction(fraction)]
 
-# Часть 2: Генерация правильных дробей с учетом простых знаменателей с усложнением
-print("\nЧасть 2: Генерация правильных дробей с учетом простых знаменателей с усложнением")
-result = generate_proper_fractions_with_primes(numbers)
-result_with_primes = [fraction for fraction in result if is_prime(fraction[1])]
-result_without_primes = [fraction for fraction in result if not is_prime(fraction[1])]
-result.sort(key=target_function, reverse=True)  # Сортировка по убыванию, чтобы первый элемент был с наибольшим знаменателем
+# Находим максимальную дробь среди четных
+max_fraction = find_max_fraction(even_fractions)
 
-print("Правильные дроби с простыми знаменателями:")
-for fraction in result_with_primes:
-    print(f"{fraction[0]}/{fraction[1]}")
-
-print("Наибольшая дробь с наибольшим простым знаменателем в наборе правильных дробей:")
-if result:
-    print(f"{result[0][0]}/{result[0][1]}")
+# Выводим результаты
+if even_fractions:
+    print("Список дробей с четными знаменателями:")
+    print(even_fractions)
+    print("Максимальная четная дробь:")
+    print(max_fraction)
 else:
-    print("Набор правильных дробей пуст")
+    print("Во введенных числах нет четных дробей.")
+
+
