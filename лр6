@@ -98,9 +98,9 @@ max_fraction = find_max_fraction(even_fractions)
 if even_fractions:
     print("Список дробей с четными знаменателями:")
     print(even_fractions)
-    print("Максимальная четная дробь:")
+    print("Максимальная дробь с четными знаменателем:")
     print(max_fraction)
 else:
-    print("Во введенных числах нет четных дробей.")
+    print("Во введенных числах нет четных.")
 
 
