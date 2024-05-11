@@ -8,33 +8,48 @@ import time
 import math
 import matplotlib.pyplot as plt
 
-"""
-Кэш для хранения вычисленных значений факториалов
-"""
+# Кэш для хранения вычисленных значений факториалов
 factorial_cache = {0: 1, 1: 1}
 
-"""
-Рекурсивное вычисление функции F
-"""
+# Глобальная переменная для знака
+sign = 1
+
+# Рекурсивное вычисление функции F
 def recursive_F(n):
-    if n == 1:
+    """
+    Рекурсивное вычисление функции F.
+    :param n: Число для которого вычисляется функция F.
+    :return: Значение функции F(n).
+    """
+    global sign
+    if n == 0:
+        return 5
+    elif n == 1:
         return 1
     else:
-        return ((-1)**n) * (recursive_F(n-1) - 2 * dynamic_Q(n-1) / (math.factorial(2*n)))
+        sign *= -1
+        return sign * (recursive_F(n - 1) - 2 * recursive_Q(n - 1) / (2 * n * math.factorial(n)))
 
-"""
-Рекурсивное вычисление функции Q
-"""
+# Рекурсивное вычисление функции Q
 def recursive_Q(n):
+    """
+    Рекурсивное вычисление функции Q.
+    :param n: Число для которого вычисляется функция Q.
+    :return: Значение функции Q(n).
+    """
     if n == 1:
         return 1
     else:
         return recursive_Q(n-1) - 2 * recursive_F(n-1)
 
-"""
-Динамическое вычисление функции Q
-"""
+# Динамическое вычисление функции Q
 def dynamic_Q(n, cache={1: 1}):
+    """
+    Динамическое вычисление функции Q.
+    :param n: Число для которого вычисляется функция Q.
+    :param cache: Кэш для хранения ранее вычисленных значений.
+    :return: Значение функции Q(n).
+    """
     if n in cache:
         return cache[n]
     else:
@@ -42,10 +57,13 @@ def dynamic_Q(n, cache={1: 1}):
         cache[n] = result
         return result
 
-"""
-Итеративное вычисление функции F и Q
-"""
+# Итеративное вычисление функции F и Q
 def iterative_F_and_Q(n):
+    """
+    Итеративное вычисление функции F и Q.
+    :param n: Число для которого вычисляются функции F и Q.
+    :return: Кортеж значений (F(n), Q(n)).
+    """
     F = [0] * (n + 1)
     Q = [0] * (n + 1)
     F[1] = 1
@@ -57,42 +75,38 @@ def iterative_F_and_Q(n):
 
     return F[n], Q[n]
 
-"""
-Функция для измерения времени выполнения
-"""
+# Функция для измерения времени выполнения
 def measure_time(func, *args):
+    """
+    Функция для измерения времени выполнения.
+    :param func: Функция, время выполнения которой измеряется.
+    :param args: Аргументы для функции.
+    :return: Время выполнения в миллисекундах.
+    """
     start_time = time.time()
     func(*args)
     end_time = time.time()
     return (end_time - start_time) * 1000  # Переводим секунды в миллисекунды
 
-"""
-Значения n для вычислений
-"""
+# Значения n для вычислений
 n_values = list(range(1, 10))  # Значения n для тестирования
 recursive_times_F = []
 dynamic_times_Q = []
 iterative_times_F = []
 
-"""
-Измерение времени выполнения для каждого значения n
-"""
+# Измерение времени выполнения для каждого значения n
 for n in n_values:
     recursive_times_F.append(measure_time(recursive_F, n))
     dynamic_times_Q.append(measure_time(dynamic_Q, n))
     iterative_F, _ = iterative_F_and_Q(n)
     iterative_times_F.append(measure_time(iterative_F_and_Q, n))
 
-"""
-Вывод результатов в табличной форме
-"""
+# Вывод результатов в табличной форме
 print(f"{'n':<10}{'Рекурсивное F (мс)':<30}{'Динамическое Q (мс)':<30}{'Итеративное F (мс)':<30}")
 for i, n in enumerate(n_values):
     print(f"{n:<10}{recursive_times_F[i]:<30.19f}{dynamic_times_Q[i]:<30.19f}{iterative_times_F[i]:<30.19f}")
 
-"""
-Построение графика
-"""
+# Построение графика
 plt.plot(n_values, recursive_times_F, label='Рекурсивное F')
 plt.plot(n_values, dynamic_times_Q, label='Динамическое Q')
 plt.plot(n_values, iterative_times_F, label='Итеративное F')
@@ -102,3 +116,4 @@ plt.legend()
 plt.title('Сравнение времени вычисления функций F(n) и Q(n)')
 plt.grid(True)
 plt.show()
+
