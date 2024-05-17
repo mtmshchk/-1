@@ -6,140 +6,74 @@
 минимум одно ограничение на характеристики объектов (которое будет сокращать количество переборов) 
 и целевую функцию для нахождения оптимального решения.
 вариант 26: Вводятся К целых чисел. Составьте все возможные различные правильные дроби из этих чисел
-Целевая функция:
-Нахождение максимальной четной дроби среди всех правильных дробей,
-у которых знаменатель является четным числом.
+Целевая функция: нахождение дроби с наименьшим числовым значением, учитывая ограничение на знаменатель (меньше введенного числа)
 """
-
-import time
 
 import itertools
 import time
-import math
 
-# 1 часть: Генерация всех возможных правильных дробей из введенных чисел
-
-# Алгоритмический подход
+# Алгоритмический способ
 def generate_fractions_algorithmic(numbers):
-    fractions_set = set()
+    fractions = []
+    n = len(numbers)
+    for i in range(n):
+        for j in range(n):
+            if i != j and numbers[i] < numbers[j]:
+                numerator = numbers[i]
+                denominator = numbers[j]
+                fractions.append(f"{numerator}/{denominator}")
+    return fractions
 
-    # Генерация всех возможных правильных дробей из пар чисел
-    for i in range(len(numbers)):
-        for j in range(i + 1, len(numbers)):
-            a, b = numbers[i], numbers[j]
-            # Проверяем, что числитель меньше знаменателя
-            if a < b:
-                # Находим НОД чисел для сокращения дроби
-                gcd = find_gcd(a, b)
+# Способ с использованием встроенных функций Python
+def generate_fractions_with_python(numbers):
+    fractions = []
+    for p, q in itertools.permutations(numbers, 2):
+        if p < q:
+            fractions.append(f"{p}/{q}")
+    return fractions
 
-                # Добавляем сокращённую дробь в множество
-                fractions_set.add("{}/{}".format(a // gcd, b // gcd))
+# Усложнение программы с ограничением (знаменатель меньше M)
+def generate_fractions_with_restrictions(numbers, M):
+    fractions = []
+    for p, q in itertools.permutations(numbers, 2):
+        if p < q and q < M:
+            fractions.append(f"{p}/{q}")
+    return fractions
 
-    return fractions_set
+# Целевая функция: находит дробь с наименьшим числовым значением и возвращает ее
+def find_min_fraction(fractions):
+    def fraction_value(fraction):
+        numerator, denominator = map(int, fraction.split('/'))
+        return numerator / denominator
+    return min(fractions, key=fraction_value)
 
-# С использованием функций Python и itertools
-def generate_fractions_pythonic(numbers):
-    fractions_set = set()
+# Ввод данных от пользователя
+numbers = list(map(int, input("Введите целые числа через пробел: ").split()))
+M = int(input("Введите ограничение для знаменателя (знаменатель меньше введенного числа): "))
 
-    # Генерация всех возможных правильных дробей из пар чисел с помощью itertools
-    for pair in itertools.combinations(numbers, 2):
-        a, b = pair
-        # Проверяем, что числитель меньше знаменателя
-        if a < b:
-            # Находим НОД чисел для сокращения дроби
-            gcd = find_gcd(a, b)
+# Алгоритмический способ
+start_time = time.time()
+fractions_alg = generate_fractions_algorithmic(numbers)
+end_time = time.time()
+time_alg = end_time - start_time
 
-            # Добавляем дробь в множество
-            fractions_set.add("{}/{}".format(a // gcd, b // gcd))
+# С использованием встроенных функций
+start_time = time.time()
+fractions_py = generate_fractions_with_python(numbers)
+end_time = time.time()
+time_py = end_time - start_time
 
-    return fractions_set
+print("Алгоритмический способ:", fractions_alg)
+print(f"Время выполнения (алгоритмический): {time_alg:.8f}")
+print("С использованием встроенных функций:", fractions_py)
+print(f"Время выполнения (с функциями Python): {time_py:.8f}")
 
-# Функция для нахождения НОД чисел
-def find_gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return a
-
-# Функция для проверки является ли дробь четной
-def is_even_fraction(fraction):
-    numerator, denominator = map(int, fraction.split('/'))
-    # Проверяем, является ли знаменатель четным
-    return denominator % 2 == 0
-
-# Функция для нахождения максимальной дроби среди списка
-def find_max_fraction(fractions_list):
-    max_fraction = None
-    for fraction in fractions_list:
-        if max_fraction is None or fraction > max_fraction:
-            max_fraction = fraction
-    return max_fraction
-
-# Функция для получения ввода от пользователя
-def get_user_input():
-    K = int(input("Введите количество целых чисел: "))
-    numbers = [int(input("Введите число {}: ".format(i + 1))) for i in range(K)]
-    return numbers
-
-# Функция для замера времени выполнения алгоритмического подхода
-def measure_time_algorithmic(numbers):
-    start_time_algorithmic = time.time()
-    fractions_algorithmic = generate_fractions_algorithmic(numbers)
-    end_time_algorithmic = time.time()
-    return fractions_algorithmic, end_time_algorithmic - start_time_algorithmic
-
-# Функция для замера времени выполнения способа с использованием функций Python и itertools
-def measure_time_pythonic(numbers):
-    start_time_pythonic = time.time()
-    fractions_pythonic = generate_fractions_pythonic(numbers)
-    end_time_pythonic = time.time()
-    return fractions_pythonic, end_time_pythonic - start_time_pythonic
-
-# Функция для вывода результатов
-def print_results(fractions_algorithmic, time_algorithmic, fractions_pythonic, time_pythonic):
-    print("Все возможные различные правильные дроби (алгоритмический подход):", fractions_algorithmic)
-    print("Время выполнения алгоритмического подхода: {:.6f} секунд".format(time_algorithmic))
-
-    print("Все возможные различные правильные дроби (способ с использованием функций Python и itertools):", fractions_pythonic)
-    print("Время выполнения способа с использованием функций Python и itertools: {:.6f} секунд".format(time_pythonic))
-
-# Получаем ввод от пользователя
-numbers = get_user_input()
-
-# Замеряем время выполнения алгоритмического подхода
-fractions_algorithmic, time_algorithmic = measure_time_algorithmic(numbers)
-
-# Замеряем время выполнения способа с использованием функций Python и itertools
-fractions_pythonic, time_pythonic = measure_time_pythonic(numbers)
-
-# Выводим результаты
-print_results(fractions_algorithmic, time_algorithmic, fractions_pythonic, time_pythonic)
-
-
-# 2 часть: Поиск четных дробей и нахождение максимальной среди них
-
-# Фильтруем четные дроби из списка
-def filter_even_fractions(fractions_list):
-    even_fractions = [fraction for fraction in fractions_list if is_even_fraction(fraction)]
-    return even_fractions
-
-# Получение максимальной дроби среди четных
-def get_max_even_fraction(even_fractions):
-    max_fraction = find_max_fraction(even_fractions)
-    return max_fraction
-
-# Вывод списка дробей с четным знаменателем и максимальной из них
-def print_even_fractions_and_max(even_fractions, max_fraction):
-    if even_fractions:
-        print("Список дробей с четным знаменателем:")
-        print(even_fractions)
-        print("Максимальная дробь с четным знаменателем:")
-        print(max_fraction)
-    else:
-        print("Во введенных числах нет четных дробей.")
-
-# Фильтруем четные дроби и находим максимальную среди них
-even_fractions = filter_even_fractions(fractions_pythonic)
-max_fraction = get_max_even_fraction(even_fractions)
-
-# Выводим результаты для второй части
-print_even_fractions_and_max(even_fractions, max_fraction)
+# Усложнение программы с ограничением и целевой функцией
+start_time = time.time()
+fractions_restricted = generate_fractions_with_restrictions(numbers, M)
+end_time = time.time()
+time_restricted = end_time - start_time
+min_fraction = find_min_fraction(fractions_restricted)
+print("С ограничениями и целевой функцией:", fractions_restricted)
+print("Минимальная дробь:", min_fraction)
+print(f"Время выполнения (с ограничениями): {time_restricted:.8f}")
