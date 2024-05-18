@@ -1,0 +1,72 @@
+"""
+вариант 26: Вводятся К целых чисел. Составьте все возможные различные правильные дроби из этих чисел
+Целевая функция: нахождение дроби с наименьшим числовым значением, 
+учитывая ограничение на знаменатель (меньше введенного числа).
+Требуется для своего варианта второй части л.р. №6 (усложненной программы) разработать реализацию 
+с использованием графического интерфейса. Допускается использовать любую графическую библиотеку питона.
+"""
+import tkinter as tk
+from tkinter import messagebox
+import itertools
+
+# Функция для генерации дробей с ограничениями
+def generate_fractions_with_restrictions(numbers, M):
+    fractions = []
+    for p, q in itertools.permutations(numbers, 2):
+        if p < q and q < M:
+            fractions.append(f"{p}/{q}")
+    return fractions
+
+# Целевая функция: находит дробь с наименьшим числовым значением и возвращает ее
+def find_min_fraction(fractions):
+    def fraction_value(fraction):
+        numerator, denominator = map(int, fraction.split('/'))
+        return numerator / denominator
+    return min(fractions, key=fraction_value)
+
+# Функция для обработки ввода и отображения результатов
+def process_input():
+    try:
+        numbers = list(map(int, entry_numbers.get().split()))
+        M = int(entry_M.get())
+        
+        if not numbers:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите хотя бы одно число.")
+            return
+        
+        if M <= 0:
+            messagebox.showerror("Ошибка", "Ограничение для знаменателя должно быть положительным числом.")
+            return
+
+        fractions = generate_fractions_with_restrictions(numbers, M)
+        if not fractions:
+            messagebox.showinfo("Результат", "Нет подходящих дробей для заданного ограничения.")
+            return
+
+        min_fraction = find_min_fraction(fractions)
+        result_text.set(f"Минимальная дробь: {min_fraction}\nВсе дроби: {', '.join(fractions)}")
+    except ValueError:
+        messagebox.showerror("Ошибка", "Пожалуйста, введите корректные целые числа.")
+
+# Создание главного окна
+root = tk.Tk()
+root.title("Генератор правильных дробей")
+
+# Метки и поля ввода
+tk.Label(root, text="Введите целые числа через пробел:").pack(pady=5)
+entry_numbers = tk.Entry(root, width=50)
+entry_numbers.pack(pady=5)
+
+tk.Label(root, text="Введите ограничение для знаменателя (знаменатель меньше введенного числа):").pack(pady=5)
+entry_M = tk.Entry(root, width=50)
+entry_M.pack(pady=5)
+
+# Кнопка для запуска обработки
+tk.Button(root, text="Сгенерировать дроби и найти минимальную", command=process_input).pack(pady=20)
+
+# Текстовое поле для отображения результатов
+result_text = tk.StringVar()
+tk.Label(root, textvariable=result_text, wraplength=500).pack(pady=20)
+
+# Запуск основного цикла
+root.mainloop()
