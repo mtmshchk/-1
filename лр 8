@@ -1,0 +1,213 @@
+"""
+Требуется написать объектно-ориентированную программу с графическим интерфейсом в соответствии со своим вариантом. 
+В программе должны быть реализованы минимум один класс, три атрибута, четыре метода (функции). 
+Ввод данных из файла с контролем правильности ввода. 
+Базы данных использовать нельзя. При необходимости сохранять информацию в виде файлов, разделяя значения запятыми или пробелами. 
+Для GUI использовать библиотеку tkinter.
+вариант 26: 
+Объекты – ромбы
+Функции:	проверка пересечения
+визуализация
+раскраска
+поворот вокруг заданной точки окружности
+"""
+import tkinter as tk
+from tkinter import colorchooser
+import math
+
+class Diamond:
+    def __init__(self, center_x, center_y, diag1, diag2, color="blue"):
+        """инициализация ромба с его центром, диагоналями и цветом"""
+        self.center_x = center_x
+        self.center_y = center_y
+        self.diag1 = diag1  # длина первой диагонали
+        self.diag2 = diag2  # длина второй диагонали
+        self.color = color  # цвет ромба
+        self.angle = 0  # угол поворота, начальный — 0
+        self.pivot_x = center_x  # координаты точки вращения по умолчанию
+        self.pivot_y = center_y
+
+    def set_pivot(self, x, y):
+        """установка новой точки вращения для ромба"""
+        self.pivot_x = x
+        self.pivot_y = y
+
+    def get_vertices(self):
+        """расчет вершин ромба на основе его центра и диагоналей"""
+        half_diag1 = self.diag1 / 2  # половина первой диагонали
+        half_diag2 = self.diag2 / 2  # половина второй диагонали
+        
+        # возвращаем вершины ромба (всего 4 вершины)
+        vertices = [
+            (self.center_x, self.center_y - half_diag1),  # верхняя вершина
+            (self.center_x + half_diag2, self.center_y),  # правая вершина
+            (self.center_x, self.center_y + half_diag1),  # нижняя вершина
+            (self.center_x - half_diag2, self.center_y)   # левая вершина
+        ]
+        return vertices
+
+    def rotate(self, angle):
+        """поворот ромба вокруг установленной точки на заданный угол"""
+        self.angle += angle  # увеличиваем угол поворота
+        angle_rad = math.radians(self.angle)  # переводим угол в радианы
+
+        def rotate_point(x, y):
+            """поворот точки (x, y) вокруг точки вращения"""
+            x -= self.pivot_x
+            y -= self.pivot_y
+            new_x = x * math.cos(angle_rad) - y * math.sin(angle_rad) + self.pivot_x
+            new_y = x * math.sin(angle_rad) + y * math.cos(angle_rad) + self.pivot_y
+            return new_x, new_y
+
+        vertices = self.get_vertices()  # получаем вершины ромба
+        rotated_vertices = [rotate_point(x, y) for x, y in vertices]  # поворачиваем все вершины
+        return rotated_vertices
+
+    def draw(self, canvas, rotated_vertices=None):
+        """рисует ромб на заданном холсте"""
+        if rotated_vertices is None:
+            rotated_vertices = self.get_vertices()  # если не переданы повёрнутые вершины, используем исходные
+        canvas.create_polygon(rotated_vertices, fill=self.color, outline="black")  # рисуем ромб
+
+    def intersects(self, other):
+        """проверка пересечения с другим ромбом"""
+        def on_segment(p, q, r):
+            """проверяет, находится ли точка q на отрезке pr"""
+            if (q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and
+                q[1] <= max(p[1], r[1]) and q[1] >= min(p[1], r[1])):
+                return True
+            return False
+
+        def orientation(p, q, r):
+            """определяет ориентацию упорядоченной тройки (p, q, r)"""
+            val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+            if val == 0:
+                return 0  # коллинеарные
+            return 1 if val > 0 else 2  # 1: часовая, 2: против часовой
+
+        def do_intersect(p1, q1, p2, q2):
+            """проверяет, пересекаются ли отрезки p1q1 и p2q2"""
+            o1 = orientation(p1, q1, p2)
+            o2 = orientation(p1, q1, q2)
+            o3 = orientation(p2, q2, p1)
+            o4 = orientation(p2, q2, q1)
+
+            if o1 != o2 and o3 != o4:
+                return True
+
+            if o1 == 0 and on_segment(p1, p2, q1):
+                return True
+            if o2 == 0 and on_segment(p1, q2, q1):
+                return True
+            if o3 == 0 and on_segment(p2, p1, q2):
+                return True
+            if o4 == 0 and on_segment(p2, q1, q2):
+                return True
+
+            return False
+
+        # проверяем пересечение каждой стороны ромба с каждой стороной другого ромба
+        vertices1 = self.rotate(0)  # получаем текущие вершины ромба
+        vertices2 = other.rotate(0)  # получаем текущие вершины другого ромба
+
+        for i in range(4):
+            for j in range(4):
+                p1 = vertices1[i]
+                q1 = vertices1[(i + 1) % 4]
+                p2 = vertices2[j]
+                q2 = vertices2[(j + 1) % 4]
+                if do_intersect(p1, q1, p2, q2):
+                    return True
+
+        return False
+
+class DiamondApp:
+    def __init__(self, root):
+        """инициализация приложения"""
+        self.root = root
+        self.root.title("приложение ромбов")
+
+        self.canvas = tk.Canvas(root, width=500, height=500, bg="white")
+        self.canvas.pack()
+
+        self.selected_diamond = tk.IntVar(value=0)  # по умолчанию выбран первый ромб
+        self.diamonds = []
+        self.setup_ui()
+
+        # добавляем два ромба вручную
+        self.add_diamonds()
+
+        # привязка клика мыши для установки точки вращения
+        self.canvas.bind("<Button-1>", self.set_pivot)
+
+    def setup_ui(self):
+        """настройка пользовательского интерфейса"""
+        tk.Button(self.root, text="проверить пересечение", command=self.check_intersection).pack()
+        tk.Button(self.root, text="повернуть ромб", command=self.rotate_selected_diamond).pack()
+        tk.Button(self.root, text="изменить цвет ромба", command=self.change_color).pack()
+
+        # радиокнопки для выбора ромба
+        tk.Radiobutton(self.root, text="ромб 1", variable=self.selected_diamond, value=0).pack(anchor=tk.W)
+        tk.Radiobutton(self.root, text="ромб 2", variable=self.selected_diamond, value=1).pack(anchor=tk.W)
+
+    def add_diamonds(self):
+        """добавление двух ромбов вручную"""
+        diamond1 = Diamond(200, 250, 100, 60, "blue")
+        diamond2 = Diamond(300, 250, 80, 50, "green")
+        self.diamonds.append(diamond1)
+        self.diamonds.append(diamond2)
+
+        self.redraw_diamonds()
+
+    def redraw_diamonds(self):
+        """перерисовка всех ромбов на холсте"""
+        self.canvas.delete("all")
+        for diamond in self.diamonds:
+            rotated_vertices = diamond.rotate(0)  # обновляем вершины
+            diamond.draw(self.canvas, rotated_vertices)
+
+    def set_pivot(self, event):
+        """установка точки вращения для выбранного ромба"""
+        selected_index = self.selected_diamond.get()
+        diamond = self.diamonds[selected_index]
+        diamond.set_pivot(event.x, event.y)
+        print(f"установлена точка вращения для ромба {selected_index + 1}: ({event.x}, {event.y})")
+
+    def check_intersection(self):
+        """проверка пересечения двух ромбов"""
+        if len(self.diamonds) < 2:
+            print("недостаточно ромбов для проверки пересечения")
+            return
+        intersect = self.diamonds[0].intersects(self.diamonds[1])
+        print("ромбы пересекаются:", intersect)
+
+    def rotate_selected_diamond(self):
+        """поворот выбранного ромба"""
+        selected_index = self.selected_diamond.get()
+        diamond = self.diamonds[selected_index]
+        angle = 10  # угол поворота
+        rotated_vertices = diamond.rotate(angle)
+
+        # очистка и перерисовка всех ромбов
+        self.canvas.delete("all")
+        for d in self.diamonds:
+            d.draw(self.canvas, d.rotate(0))  # перерисовываем ромбы без поворота
+
+    def change_color(self):
+        """изменение цвета для выбранного ромба"""
+        if not self.diamonds:
+            print("нет ромбов для изменения цвета")
+            return
+        
+        selected_index = self.selected_diamond.get()
+        diamond = self.diamonds[selected_index]
+        color_code = colorchooser.askcolor()[1]  # открываем диалог для выбора цвета
+        if color_code:  # если цвет выбран
+            diamond.color = color_code
+            self.redraw_diamonds()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DiamondApp(root)
+    root.mainloop()
+
