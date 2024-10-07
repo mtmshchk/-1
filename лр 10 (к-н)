@@ -4,17 +4,17 @@ from tkinter import messagebox
 window = tk.Tk()
 window.title("Крестики-нолики")
 window.state('zoomed')
-window.configure(bg="#2F4F4F")  # Темный болотный цвет фона
+window.configure(bg="#2F4F4F")  #цвет фона
 
-# Шрифты
-font_big = ("Arial", 28, "bold")  # Увеличили размер шрифта и сделали его жирным
-font_small = ("Arial", 20, "bold")  # Увеличили размер и сделали жирным для других текстов
+#шрифты
+font_big = ("Arial", 28, "bold")  
+font_small = ("Arial", 20, "bold")  
 
-current_player = "X"  # Текущий игрок
-board = [""] * 9  # Игровое поле
+current_player = "X"  #текущий игрок
+board = [""] * 9  #игровое поле
 play_vs_computer = False  
 
-# Проверка на победителя
+#проверка на победителя
 def check_winner():
     winning_combos = [(0, 1, 2), (3, 4, 5), (6, 7, 8),
                       (0, 3, 6), (1, 4, 7), (2, 5, 8),
@@ -29,7 +29,7 @@ def check_winner():
 
     return None
 
-# Алгоритм для логики хода компьютера
+#алгоритм для логики хода компьютера
 def minimax(is_maximizing):
     winner = check_winner()
     if winner == "X":
@@ -58,7 +58,7 @@ def minimax(is_maximizing):
                 best_score = min(score, best_score)
         return best_score
 
-# Ход компьютера
+#ход компьютера
 def computer_turn():
     best_score = -float('inf')
     best_move = None
@@ -80,7 +80,7 @@ def computer_turn():
         else:
             switch_turn()
 
-# Обработка нажатия на кнопку
+#обработка нажатия на кнопку
 def button_click(index):
     global current_player
 
@@ -97,13 +97,13 @@ def button_click(index):
             else:
                 switch_turn()
 
-# Переключение хода между игроками
+#переключение хода между игроками
 def switch_turn():
     global current_player
     current_player = "O" if current_player == "X" else "X"
     label_turn.config(text=f"Ход: {current_player}")
 
-# Отображение результата игры
+#отображение результата игры
 def show_result(winner):
     if winner == "Ничья":
         messagebox.showinfo("Результат", "Игра закончилась в ничью!")
@@ -116,7 +116,7 @@ def show_result(winner):
         messagebox.showinfo("Результат", f"Выиграл игрок {winner}!")
     reset_game()
 
-# Перезапуск игры
+#перезапуск игры
 def reset_game():
     global board, current_player
     board = [""] * 9
@@ -125,33 +125,33 @@ def reset_game():
         button.config(text="", state="normal")
     label_turn.config(text=f"Ход: {current_player}")
 
-# Начало игры против компьютера
+#начало игры против компьютера
 def start_vs_computer():
     global play_vs_computer
     play_vs_computer = True
     label_status.config(text="Игра против компьютера")
     reset_game()
 
-# Начало игры против другого игрока
+#начало игры против другого игрока
 def start_vs_player():
     global play_vs_computer
     play_vs_computer = False
     label_status.config(text="Игра против игрока")
     reset_game()
 
-# Выход из игры
+#выход из игры
 def exit_game():
-    window.destroy()  # Закрываем окно игры
+    window.destroy()  #закрываем окно игры
 
 label_status = tk.Label(window, text="Игра против игрока", font=font_small, bg="#2F4F4F", fg="#FFFFFF")  # Цвет фона и текста
 label_status.pack(pady=5)
 
-# Метка для отображения текущего хода
+#метка для отображения текущего хода
 label_turn = tk.Label(window, text=f"Ход: {current_player}", font=font_small, bg="#2F4F4F", fg="#FFFFFF")  # Цвет фона и текста
 label_turn.pack(pady=5)
 
-# Создаем игровое поле
-frame = tk.Frame(window, bg="#2F4F4F")  # Темный болотный цвет фона
+#создаем игровое поле
+frame = tk.Frame(window, bg="#2F4F4F") 
 frame.pack(pady=20)
 
 buttons = []
@@ -161,7 +161,7 @@ for i in range(9):
     button.grid(row=i // 3, column=i % 3, padx=8, pady=8)
     buttons.append(button)
 
-# Кнопки для выбора режима игры с изменяющимся цветом при нажатии
+#кнопки для выбора режима игры с изменяющимся цветом при нажатии
 reset_button = tk.Button(window, text="Перезапуск", font=font_small, command=reset_game, 
                          bg="#808080", fg="#808080", activebackground="#000000", activeforeground="#FFFFFF")
 reset_button.pack(pady=5)
@@ -174,12 +174,12 @@ player_button = tk.Button(window, text="Играть против игрока",
                           bg="#808080", fg="#808080", activebackground="#000000", activeforeground="#FFFFFF")
 player_button.pack(pady=5)
 
-# Кнопка выхода
+#кнопка выхода
 exit_button = tk.Button(window, text="Выход", font=font_small, command=exit_game, 
                         bg="#2F4F4F", fg="#808080", activebackground="#000000", activeforeground="#FFFFFF")
 exit_button.pack(pady=5)
 
-# Разделение кнопок и игрового поля для улучшения визуального восприятия
+#разделение кнопок и игрового поля для улучшения визуального восприятия
 separator = tk.Frame(window, bg="#2F4F4F", height=2)
 separator.pack(fill="x", pady=20)
 
